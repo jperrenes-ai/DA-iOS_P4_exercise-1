@@ -12,9 +12,39 @@ struct ToDoListView: View {
     var body: some View {
         NavigationView {
             VStack {
-                // Filter selector
-                // TODO: - Add a filter selector which will call the viewModel for updating the displayed data
-                // List of tasks
+                // Selection du type des taches (all, Done, Not done)
+                HStack(spacing: 0) {
+                    ForEach(0..<3) { index in
+                        Button(action: {
+                            filterIndex = index
+                            viewModel.applyFilter(at: index)
+                        }) {
+                            Text(filterTitle(for: index))
+                                .font(.subheadline)
+                                .fontWeight(filterIndex == index ? .semibold : .regular)
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 6)
+                                .background(
+                                    // Ombre sur le bouton actif.
+                                    RoundedRectangle(cornerRadius: 7)
+                                        .fill(filterIndex == index ? Color.white : Color.clear)
+                                        .shadow(
+                                            color: filterIndex == index ? Color.black.opacity(0.2) : Color.clear,
+                                            radius: 2,
+                                            x: 0,
+                                            y: 1
+                                        )
+                                )
+                        }
+                    }
+                }
+                .padding(3)
+                .background(Color.gray.opacity(0.15))
+                .cornerRadius(8)
+                .padding(.horizontal)
+
+                // Liste des taches
                 List {
                     ForEach(viewModel.toDoItems) { item in
                         HStack {
@@ -32,6 +62,7 @@ struct ToDoListView: View {
                                 .foregroundColor(item.isDone ? .gray : .primary)
                         }
                     }
+                    
                     .onDelete { indices in
                         indices.forEach { index in
                             let item = viewModel.toDoItems[index]
@@ -39,7 +70,8 @@ struct ToDoListView: View {
                         }
                     }
                 }
-                
+                .padding(.top, 10)
+
                 // Sticky bottom view for adding todos
                 if isAddingTodo {
                     HStack {
@@ -91,6 +123,15 @@ struct ToDoListView: View {
             }
             .navigationBarTitle("To-Do List")
             .navigationBarItems(trailing: EditButton())
+        }
+    }
+
+    // Renvoie le titre du bouton de filtre selon son index.
+    private func filterTitle(for index: Int) -> String {
+        switch index {
+        case 1: return "Done"
+        case 2: return "Not Done"
+        default: return "All"
         }
     }
 }
